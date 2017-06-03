@@ -346,47 +346,12 @@ class Downloader(object):
                cleartempfiles=True):
         """
         Combines all the dowloaded stream segments into the final mp4 file.
-
         :param output_filename: Output file path
         :param skipffmpeg: bool flag to not use ffmpeg to join audio and video file into final mp4
         :param cleartempfiles: bool flag to remove downloaded and temp files
         """
         if not self.stream_id:
             raise ValueError('No stream ID found.')
-        audio_stream = os.path.join(self.output_dir, 'source_%s_m4a.tmp' % self.stream_id)
-        video_stream = os.path.join(self.output_dir, 'source_%s_mp4.tmp' % self.stream_id)
-
-        with open(audio_stream, 'wb') as outfile:
-            logger.debug('Assembling audio stream... %s' % audio_stream)
-            # Audio segments are named: '<stream-id>-<numeric-seq-num>.m4a'
-            files = list(filter(
-                os.path.isfile,
-                glob.glob(os.path.join(self.output_dir, '%s-*.m4a' % self.stream_id))))
-            files = sorted(files, key=lambda x: self._get_file_index(x))
-            for f in files:
-                with open(f, 'rb') as readfile:
-                    try:
-                        shutil.copyfileobj(readfile, outfile)
-                    except IOError as e:
-                        logger.error('Error processing %s' % f)
-                        logger.error(e)
-                        raise e
-
-        with open(video_stream, 'wb') as outfile:
-            logger.debug('Assembling video stream... %s' % video_stream)
-            # Videos segments are named: '<stream-id>-<numeric-seq-num>.m4v'
-            files = list(filter(
-                os.path.isfile,
-                glob.glob(os.path.join(self.output_dir, '%s-*.m4v' % self.stream_id))))
-            files = sorted(files, key=lambda x: self._get_file_index(x))
-            for f in files:
-                with open(f, 'rb') as readfile:
-                    try:
-                        shutil.copyfileobj(readfile, outfile)
-                    except IOError as e:
-                        logger.error('Error processing %s' % f)
-                        logger.error(e)
-                        raise e
 
         has_ffmpeg_error = False
         files_generated = []
